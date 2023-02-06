@@ -31,7 +31,7 @@ app.post('/checksum', (request, response) => {
             console.log('File found');
         } else {
             console.log('File not found');
-            return response.json({ "file": null, "error": "File not found." });
+            return response.json({ "file": request.body.file, "error": "File not found." });
         }
 
         let config = {
