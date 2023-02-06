@@ -1,0 +1,28 @@
+version: "3"
+services:
+  validator-ms-1:
+    image: rishivasa/rishivasa-validator-microservice1
+    volumes:
+      - ./:/files
+    ports:
+      - "5000:5000"
+    networks:
+      - file-checksum-network
+    depends_on:
+      - checksum-ms-2
+
+  checksum-ms-2:
+    image: rishivasa/rishivasa-checksum-calculator-microservice-2
+    volumes:
+      - ./:/files
+    ports:
+      - "8081:8081"
+    networks:
+      - file-checksum-network
+
+networks:
+  file-checksum-network:
+
+volumes:
+  file-checksum-volume:
+    external: false

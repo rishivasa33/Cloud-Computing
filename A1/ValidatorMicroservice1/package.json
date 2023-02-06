@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm i && node APIHandlerMS1.js"
+    "start": "npm install && node APIHandlerMS1.js"
   },
   "keywords": [],
   "author": "",

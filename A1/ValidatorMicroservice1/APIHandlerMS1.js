@@ -25,9 +25,9 @@ app.post('/checksum', (request, response) => {
     console.log("Request Recieved: " + JSON.stringify(request.body));
     if (request.body.file) {
 
-        const path = '../' + request.body.file;
+        const filePath = '/files/' + request.body.file;
 
-        if (fs.existsSync(path)) {
+        if (fs.existsSync(filePath)) {
             console.log('File found');
         } else {
             console.log('File not found');
@@ -39,7 +39,7 @@ app.post('/checksum', (request, response) => {
                 'Content-Type': 'application/json',
             }
         }
-        axios.post('http://localhost:8081/', request.body, config)
+        axios.post('http://checksum-ms-2:8081/', request.body, config)
             .then(function (checksumResponse) {
                 return response.send(checksumResponse.data);
             })

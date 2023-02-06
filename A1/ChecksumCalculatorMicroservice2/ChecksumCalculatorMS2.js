@@ -20,7 +20,7 @@ app.use(cors());
 app.post('/', (request, response) => {
     console.log("Request Recieved: " + JSON.stringify(request.body));
 
-    const filePath = '../' + request.body.file;
+    const filePath = '/files/' + request.body.file;
 
     const fileBuffer = fs.readFileSync(filePath);
     const md5Hash = crypto.createHash("md5").update(fileBuffer).digest("hex");
