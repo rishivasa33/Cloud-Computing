@@ -19,6 +19,13 @@ const ROBS_APP_IP = "http://52.91.127.198:8080/start"
 const bucketName = "rishivasa-b00902815";
 const fileBaseName = "B00902815_A2_File.txt";
 
+AWS.config.update({
+    accessKeyId: "ASIAVUSSQ63ZMMTYBSEV",
+    secretAccessKey: "h7W/IiJfExFvJ+2Fahue8CMU2zULPJHn2DdUpa2G",
+    sessionToken: "FwoGZXIvYXdzEJr//////////wEaDNtUzBBaj+mHVyni2CLAAT0pA71h/RMxIzD5xyDlO0Ahu9uTY3H5jU4MhccD1BGm84RStWOOPfY4YBaSV2zOz9cVudvs6d11i+rUHY3YoYmGYMvjfkysp5atQD6Fjh0GWhbjjfm5LQNi+g7mGv/uzGBFE9oE0YBdUZ12xGfCwV6s7fYOWh86GW0eJaOpYOScmg56jifDfO3CBuIxlOMZNXdwnH9HchnfKRYOkw9jes75jtXvk6s7K4FCC8FDlj4S09sRA6Q9a0jaDpKTKH4YaSiw/OifBjItVaBBIePMhuAGWXj3Bo25h5fKtBAHMjpKEQ8dsbVnO/c/wBdFh5b6BSKc5SmC",
+    region: "us-east-1"
+});
+
 var s3 = new AWS.S3();
 
 app.get('/', (req, res) => {
