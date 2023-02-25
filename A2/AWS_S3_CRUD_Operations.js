@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
     res.send("Hello, Welcome to Rishi's CSCI 5409 - Assignment 2!");
 });
 
-//POST a request to Rob's /start endpoint upon app startup
+//POST a request to Rob's /start endpoint upon app startup. COMMENT OUT TILL LINE 50 if running on local machine (not EC2 instance)
 let newRequest = {
     "banner": BANNER,
     "ip": MY_EC2_IP
