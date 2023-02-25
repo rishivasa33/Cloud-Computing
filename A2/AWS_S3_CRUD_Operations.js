@@ -13,18 +13,11 @@ app.use(bodyParser.json());
 app.use(cors());
 
 //AWS-SDK References: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html & https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html
-const BANNER = "B00902815";
-const MY_EC2_IP = "34.205.65.187";
+const BANNER = "B00TESTHEHE";
+const MY_EC2_IP = "34.205.65.222";
 const ROBS_APP_IP = "http://52.91.127.198:8080/start"
 const bucketName = "rishivasa-b00902815";
 const fileBaseName = "B00902815_A2_File.txt";
-
-AWS.config.update({
-    accessKeyId: "ASIAVUSSQ63ZE7CANM7E",
-    secretAccessKey: "hkl5f3OrCovLwZ2rOzEmet0qBqcPG1Yl7j1Pf4WW",
-    sessionToken: "FwoGZXIvYXdzEJL//////////wEaDCXttBh9ZJJnp/9/OyLAAavp59egoxjvYIPLsxmOpn1S+SZFN/jHf3bZJb2vjzUAsqftfScctFSltf8iSckmD6Em0ffNW8GsE0Uvuf7AlEn+YLnuOzXZ57+mvcy2FMVf58vD5Z52spkBYmM1Ay/5vnpyJRI7RwI2NPiD9MeipZLr6Q7F+zjxTM2mo70rYX4mjPWg1cApUcTRn/pglSiEoJOX1e81dqGjBkZilY3WaBoOHLLJO9O8HDM5V7ZkMwBZ5OP6fQ1Vbg/N8c3vWhvH/CiAiOefBjIt6lhgQsd/aRIBfj5CtKxkSw5rXPoiqnIGhJ6wOBjNL9FN886loc33wTwGFr/k",
-    region: "us-east-1"
-});
 
 var s3 = new AWS.S3();
 
