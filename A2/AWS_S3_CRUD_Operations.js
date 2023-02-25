@@ -21,9 +21,9 @@ const bucketName = "rishivasa-b00902815";
 const fileBaseName = "B00902815_A2_File.txt";
 
 AWS.config.update({
-    aws_access_key_id: "ASIAVUSSQ63ZFD42ZINF",
-    aws_secret_access_key: "rDMJIGmxmLY0kBkG2uJBlWQyAZveWSYtmYHwh/2Y",
-    aws_session_token: "FwoGZXIvYXdzEI///////////wEaDL+X4AgzDz57WW46NyLAAWcJw8ceYwbU0U93H/xVmYE7NDpAAkAJkAu4wV29ml9GQJYIHEeXGcUn8M7Z5Msky1+4HZEMdt1Bcig82PjrlFqGL65osDff+ykQDZtaelIf1tcdVRGv0eJmKdb0eQx+jlMtpWp9aOoI53sYr6oySrTEmKrkxoVnscQjEgjmIOYAFQAtmYFsAO2TByx0t+Ptm3mp47oAGaAdz3DQ4yxN7CYRp+YAPSH59Wxim0lPEGzpkOEKxuN3u732JuoI//8tTCjGu+afBjItmR92iKbNffXSebLiX+1ZoRVYFkKrLLWDUnZtsiG54y+UEGjRB6p6sZ7b4KGu",
+    aws_access_key_id: "ASIAVUSSQ63ZE7CANM7E",
+    aws_secret_access_key: "hkl5f3OrCovLwZ2rOzEmet0qBqcPG1Yl7j1Pf4WW",
+    aws_session_token: "FwoGZXIvYXdzEJL//////////wEaDCXttBh9ZJJnp/9/OyLAAavp59egoxjvYIPLsxmOpn1S+SZFN/jHf3bZJb2vjzUAsqftfScctFSltf8iSckmD6Em0ffNW8GsE0Uvuf7AlEn+YLnuOzXZ57+mvcy2FMVf58vD5Z52spkBYmM1Ay/5vnpyJRI7RwI2NPiD9MeipZLr6Q7F+zjxTM2mo70rYX4mjPWg1cApUcTRn/pglSiEoJOX1e81dqGjBkZilY3WaBoOHLLJO9O8HDM5V7ZkMwBZ5OP6fQ1Vbg/N8c3vWhvH/CiAiOefBjIt6lhgQsd/aRIBfj5CtKxkSw5rXPoiqnIGhJ6wOBjNL9FN886loc33wTwGFr/k",
     region_name: "us-east-1"
 });
 
