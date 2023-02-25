@@ -7,7 +7,6 @@ const AWS = require('aws-sdk');
 
 const PORT = 80;
 const app = express();
-app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
