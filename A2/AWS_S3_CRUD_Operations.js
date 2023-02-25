@@ -3,7 +3,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const helmet = require('helmet');
 const AWS = require('aws-sdk');
 
 const PORT = 80;
