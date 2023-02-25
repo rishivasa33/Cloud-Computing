@@ -13,8 +13,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 //AWS-SDK References: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html & https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html
-const BANNER = "B00TESTHEHE";
-const MY_EC2_IP = "34.205.65.222";
+const BANNER = "B00902815";
+const MY_EC2_IP = "100.25.41.152";
 const ROBS_APP_IP = "http://52.91.127.198:8080/start"
 const bucketName = "rishivasa-b00902815";
 const fileBaseName = "B00902815_A2_File.txt";
