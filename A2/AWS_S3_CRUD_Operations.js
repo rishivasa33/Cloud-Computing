@@ -19,10 +19,10 @@ const bucketName = "rishivasa-b00902815";
 const fileBaseName = "B00902815_A2_File.txt";
 
 AWS.config.update({
-    aws_access_key_id: "ASIAVUSSQ63ZE7CANM7E",
-    aws_secret_access_key: "hkl5f3OrCovLwZ2rOzEmet0qBqcPG1Yl7j1Pf4WW",
-    aws_session_token: "FwoGZXIvYXdzEJL//////////wEaDCXttBh9ZJJnp/9/OyLAAavp59egoxjvYIPLsxmOpn1S+SZFN/jHf3bZJb2vjzUAsqftfScctFSltf8iSckmD6Em0ffNW8GsE0Uvuf7AlEn+YLnuOzXZ57+mvcy2FMVf58vD5Z52spkBYmM1Ay/5vnpyJRI7RwI2NPiD9MeipZLr6Q7F+zjxTM2mo70rYX4mjPWg1cApUcTRn/pglSiEoJOX1e81dqGjBkZilY3WaBoOHLLJO9O8HDM5V7ZkMwBZ5OP6fQ1Vbg/N8c3vWhvH/CiAiOefBjIt6lhgQsd/aRIBfj5CtKxkSw5rXPoiqnIGhJ6wOBjNL9FN886loc33wTwGFr/k",
-    region_name: "us-east-1"
+    accessKeyId: "ASIAVUSSQ63ZE7CANM7E",
+    secretAccessKey: "hkl5f3OrCovLwZ2rOzEmet0qBqcPG1Yl7j1Pf4WW",
+    sessionToken: "FwoGZXIvYXdzEJL//////////wEaDCXttBh9ZJJnp/9/OyLAAavp59egoxjvYIPLsxmOpn1S+SZFN/jHf3bZJb2vjzUAsqftfScctFSltf8iSckmD6Em0ffNW8GsE0Uvuf7AlEn+YLnuOzXZ57+mvcy2FMVf58vD5Z52spkBYmM1Ay/5vnpyJRI7RwI2NPiD9MeipZLr6Q7F+zjxTM2mo70rYX4mjPWg1cApUcTRn/pglSiEoJOX1e81dqGjBkZilY3WaBoOHLLJO9O8HDM5V7ZkMwBZ5OP6fQ1Vbg/N8c3vWhvH/CiAiOefBjIt6lhgQsd/aRIBfj5CtKxkSw5rXPoiqnIGhJ6wOBjNL9FN886loc33wTwGFr/k",
+    region: "us-east-1"
 });
 
 var s3 = new AWS.S3();
