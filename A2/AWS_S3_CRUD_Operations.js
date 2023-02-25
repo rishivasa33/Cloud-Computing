@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const AWS = require('aws-sdk');
+const axios = require('axios');
 
 const PORT = 80;
 const app = express();
@@ -11,9 +12,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
-//AWS-SDK Reference: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html
-const BANNER = "B00TESTHAHA";
-const MY_EC2_IP = "0.0.0.0/0";
+//AWS-SDK References: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html & https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html
+const BANNER = "B00902815";
+const MY_EC2_IP = "34.205.65.187";
 const ROBS_APP_IP = "http://52.91.127.198:8080"
 const bucketName = "rishivasa-b00902815";
 const fileBaseName = "B00902815_A2_File.txt";
@@ -31,31 +32,27 @@ app.get('/', (req, res) => {
     res.send("Hello, Welcome to Rishi's CSCI 5409 - Assignment 2!");
 });
 
-//app.post('/start', (request, response) => {
-//console.log("Request Recieved to /start: " + JSON.stringify(request.body));
-
-// let newRequest = {
-//     "banner": BANNER,
-//     "ip": EC2_IP
-// }
-// let config = {
-//     headers: {
-//         'Content-Type': 'application/json',
-//     }
-// }
-// axios.post('http://localhost:80/storedata', newRequest, config);
-
-//.then(function (robsResponse) {
-//console.log("Response Recieved from /storedata: " + JSON.stringify(robsResponse.data));
-//})
-//});
+//POST a request to Rob's /start endpoint upon app startup
+let newRequest = {
+    "banner": BANNER,
+    "ip": MY_EC2_IP
+}
+let config = {
+    headers: {
+        'Content-Type': 'application/json',
+    }
+}
+axios.post(ROBS_APP_IP, newRequest, config)
+    .then(function (response) {
+        console.log(response.data);
+    });
 
 app.post('/storedata', (request, response) => {
-    console.log("Request Recieved to storedata: " + JSON.stringify(request.body));
+    console.log("Request Recieved to /storedata: " + JSON.stringify(request.body));
     var params = {
         Bucket: bucketName,
         Body: request.body.data,
-        Key: fileBaseName, //+ Date.now(),
+        Key: fileBaseName,
         ACL: "public-read-write"
     };
     s3.upload(params, function (err, data) {
@@ -75,7 +72,7 @@ app.post('/appenddata', (request, response) => {
 
     var params = {
         Bucket: bucketName,
-        Key: fileBaseName // + Date.now()
+        Key: fileBaseName
     };
 
     s3.getObject(params, function (err, data) {
@@ -118,9 +115,13 @@ app.post('/appenddata', (request, response) => {
 app.post('/deletefile', (request, response) => {
     console.log("Request Recieved to /deletefile: " + JSON.stringify(request.body));
 
+    const s3uri = request.body.s3uri;
+    const fileName = s3uri.split('/').pop();
+    console.log("Object to be Deleted: " + fileName);
+
     var params = {
         Bucket: bucketName,
-        Key: fileBaseName // + Date.now()
+        Key: fileName
     };
 
     s3.deleteObject(params, function (err, data) {
