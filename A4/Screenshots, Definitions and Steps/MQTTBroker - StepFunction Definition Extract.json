@@ -1,0 +1,64 @@
+{
+  "Comment": "A Hello World example demonstrating various state types of the Amazon States Language",
+  "StartAt": "MQTTBroker",
+  "States": {
+    "MQTTBroker": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.type",
+          "StringEquals": "CONNECT",
+          "Next": "SQS SendMessage to CONNECT Queue"
+        },
+        {
+          "Variable": "$.type",
+          "StringEquals": "SUBSCRIBE",
+          "Next": "SQS SendMessage to SUBSCRIBE Queue"
+        },
+        {
+          "Variable": "$.type",
+          "StringEquals": "PUBLISH",
+          "Next": "SQS SendMessage to PUBLISH Queue"
+        }
+      ],
+      "Comment": "Choose which Type of Queue to post a Message",
+      "Default": "Fail State"
+    },
+    "Fail State": {
+      "Type": "Fail",
+      "Error": "InvalidType",
+      "Cause": "Could not find Valid Type to post message",
+      "Comment": "Could not find Valid Type to post message"
+    },
+    "SQS SendMessage to CONNECT Queue": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "MessageBody.$": "$",
+        "QueueUrl": "https://sqs.us-east-1.amazonaws.com/387793876722/ConnectQueue"
+      },
+      "End": true,
+      "Comment": "Send Message to CONNECT Queue"
+    },
+    "SQS SendMessage to SUBSCRIBE Queue": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "MessageBody.$": "$",
+        "QueueUrl": "https://sqs.us-east-1.amazonaws.com/387793876722/SubscribeQueue"
+      },
+      "End": true,
+      "Comment": "SendMessage to SUBSCRIBE Queue"
+    },
+    "SQS SendMessage to PUBLISH Queue": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "MessageBody.$": "$",
+        "QueueUrl": "https://sqs.us-east-1.amazonaws.com/387793876722/PublishQueue"
+      },
+      "End": true,
+      "Comment": "SendMessage to PUBLISH Queue"
+    }
+  }
+}

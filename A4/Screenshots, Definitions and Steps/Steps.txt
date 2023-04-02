@@ -1,0 +1,69 @@
+Steps:
+
+1) Create 3 Queues for CONNECT, SUBSCRIBE, PUBLISH
+	1) Type --> Standard
+	2) Enable Amazon SQS key (SSE-SQS) Encryption
+	3) Access Policy --> Basic
+		a) In both send and receive policies --> Select Only the specified AWS accounts, IAM users and roles
+		b) Add ARN of LabRole in both --> arn:aws:iam::387793876722:role/LabRole
+	4) Create Queues
+
+2) Create a Step Function
+	1) Go To Workflow Studio
+	2) Add a choice state --> MQTTBroker
+	3) Add Rules for each type --> if $.type == "CONNECT" --> Send Message to Connect Queues
+	4) Add default Fail State Rules
+	5) Add SQS SendMessage States for each Type
+		a) Enter Queue ARN: https://sqs.us-east-1.amazonaws.com/387793876722/ConnectQueue
+		b) Use StateInput as message to forward request body to the Queue
+		c) Do NOT select any IAM role in this State or it gives error
+		d) Select NextState --> Go To End
+	6) Test State Machine using "Start Execution" Button
+	
+3) Create an endpoint /mqttbroker in API Gateway to call the step function
+	1) Build REST API --> New API "IOTPlatformAPI" --> Endpoint Type: Regional
+	2) Create Resource /mqttbroker --> Enable CORS
+	3) Create POST method within Resource --> 
+		Integration Type: AWS Service
+		AWS Region: US-East-1
+		AWS Service: Step Function
+		HTTP Method: POST
+		Use Action Name: StartExecution (MANDATORY to start executing step function)
+		Execution role: ARN of LabRole --> arn:aws:iam::387793876722:role/LabRole
+		Content Handling: Passthrough to pass the request body as-is
+	4) Save
+	5) To test, use the JSON: 	{
+								   "input": "{\"type\":\"CONNECT\",\"username\":\"user1\",\"password\":\"pass123\"}",
+								   "stateMachineArn": "arn:aws:states:us-east-1:387793876722:stateMachine:IoT-Platform-QueueingSystem"
+								}
+		at: https://l2uqraj79k.execute-api.us-east-1.amazonaws.com/prod/mqttbroker
+	
+4) Create a Lambda Function
+	1) Create Function from BluePrint --> HelloWorld from Node.js 14.x
+	2) Give Function Name --> IOT-Platform-Engine
+	3) Use an existing role --> LabRole
+	4) Create Function
+	5) Update code according to requirements and test and deploy
+	
+5) Create an endpoint /poll in API Gateway to call the Lambda function
+	1) Create Resource /poll --> Enable CORS
+	2) Create POST method within Resource --> 
+		Integration Type: Lambda Function
+		Region: US-East-1
+		Lambda Function: Give ARN/Name of the Lambda Function --> arn:aws:lambda:us-east-1:387793876722:function:IOT-Platform-Engine
+	3) Save
+	4) To Test, use the JSON:	{
+									"type": "SUBSCRIBE" 
+								}
+		at: https://l2uqraj79k.execute-api.us-east-1.amazonaws.com/prod/poll
+		
+
+References:
+1) https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html
+2) https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-api-gateway.html
+3) https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html
+4) https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-lambda-non-proxy-integration.html
+5) https://docs.aws.amazon.com/lambda/latest/dg/nodejs-handler.html
+6) https://stackoverflow.com/questions/33898512/spread-syntax-vs-rest-parameter-in-es2015-es6
+7) https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/sqs-examples-send-receive-messages.html
+8) https://www.linkedin.com/pulse/sqs-send-receive-delete-messages-nodejs-karandeep-singh-/?trk=articles_directory

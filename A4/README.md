@@ -11,6 +11,8 @@
 2) Change the Queue URLs according to your queue in lines 14 - 20
 2) Deploy this code on an AWS Lambda Function
 
+Note: Check the "Screenshots, Definitions and Steps" Folder for the Steps to configure the entire system, and the screenshots and exports of the Step Function.
+
 ## Sources Used (For the entire assignment)
 
 1) https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html
