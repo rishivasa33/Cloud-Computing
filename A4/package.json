@@ -1,0 +1,15 @@
+{
+  "name": "a4",
+  "version": "1.0.0",
+  "description": "Cloud A4 - IOT Platform Engine",
+  "main": "AWS_IOTPlatformEngine_Lambda.js",
+  "scripts": {
+    "start": "npm i && node AWS_IOTPlatformEngine_Lambda.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rishi Vasa",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1348.0"
+  }
+}
