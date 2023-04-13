@@ -1,0 +1,426 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+
+  #Lambda for Encryption
+  SKCEncryptLambdaCF:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: "SKCEncryptLambdaCF"
+      Runtime: "nodejs14.x"
+      Description: "Lambda function for SymmetricKeyCryptoSystem encryption"
+      Timeout: 3
+      Role: "arn:aws:iam::387793876722:role/LabRole"
+      Code:
+        S3Bucket: "rishivasa-b00902815"
+        S3Key: "SKCLambdaFunctions_V4.0.zip"
+      Handler: "encryptFlow.handler"
+
+  #Lambda for Decryption
+  SKCDecryptLambdaCF:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: "SKCDecryptLambdaCF"
+      Runtime: "nodejs14.x"
+      Description: "Lambda function for SymmetricKeyCryptoSystem decryption"
+      Timeout: 3
+      Role: "arn:aws:iam::387793876722:role/LabRole"
+      Code:
+        S3Bucket: "rishivasa-b00902815"
+        S3Key: "SKCLambdaFunctions_V4.0.zip"
+      Handler: "decryptFlow.handler"
+
+  #Lambda for Fetching the Message from Queue
+  SKCFetchMsgLambdaCF:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: "SKCFetchMsgLambdaCF"
+      Runtime: "nodejs14.x"
+      Description: "Lambda function for SymmetricKeyCryptoSystem fetching message from the queue"
+      Timeout: 3
+      Role: "arn:aws:iam::387793876722:role/LabRole"
+      Code:
+        S3Bucket: "rishivasa-b00902815"
+        S3Key: "SKCLambdaFunctions_V4.0.zip"
+      Handler: "fetchMQMessage.handler"
+
+  #Lambda for Fetching all Logs from Dynamo Table
+  SKCFetchLogsLambdaCF:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: "SKCFetchLogsLambdaCF"
+      Runtime: "nodejs14.x"
+      Description: "Lambda function for SymmetricKeyCryptoSystem fetching all logs from the Dynamo DB Table"
+      Timeout: 3
+      Role: "arn:aws:iam::387793876722:role/LabRole"
+      Code:
+        S3Bucket: "rishivasa-b00902815"
+        S3Key: "SKCLambdaFunctions_V4.0.zip"
+      Handler: "fetchLogMessages.handler"
+
+  #API Gateway Creation for Routing to Lambdas
+  SKCRestAPIGatewayCF:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "SKCRestAPIGatewayCF"
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      Description: "API Gateway for SymmetricKeyCryptoSystem Term Assignment"
+
+  EncryptResourceCF:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ParentId: !GetAtt SKCRestAPIGatewayCF.RootResourceId
+      PathPart: "encrypt"
+
+  EncryptResourcePostMethodCF:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      HttpMethod: "POST"
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ResourceId: !Ref EncryptResourceCF
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SKCEncryptLambdaCF.Arn}/invocations"
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: '{"body": $input.json("$")}'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          - StatusCode: '400'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          - StatusCode: '500'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: '200'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+        - StatusCode: '400'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Origin: false
+        - StatusCode: '500'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Origin: false
+
+  EncryptResourceOptionsMethodCF:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ResourceId: !Ref EncryptResourceCF
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
+  DecryptResourceCF:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ParentId: !GetAtt SKCRestAPIGatewayCF.RootResourceId
+      PathPart: "decrypt"
+
+  DecryptResourcePostMethodCF:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      HttpMethod: "POST"
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ResourceId: !Ref DecryptResourceCF
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SKCDecryptLambdaCF.Arn}/invocations"
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: '{"body": $input.json("$")}'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          - StatusCode: '400'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          - StatusCode: '500'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: '200'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+        - StatusCode: '400'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Origin: false
+        - StatusCode: '500'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Origin: false
+
+  DecryptResourceOptionsMethodCF:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ResourceId: !Ref DecryptResourceCF
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
+  FetchMessagesResourceCF:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ParentId: !GetAtt SKCRestAPIGatewayCF.RootResourceId
+      PathPart: "getmessages"
+
+  FetchMessagesGetMethodCF:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      HttpMethod: "GET"
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ResourceId: !Ref FetchMessagesResourceCF
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SKCFetchMsgLambdaCF.Arn}/invocations"
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: '{"body": $input.json("$")}'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          - StatusCode: '400'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          - StatusCode: '500'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: '200'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+        - StatusCode: '400'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Origin: false
+        - StatusCode: '500'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Origin: false
+        
+  FetchLogsResourceCF:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ParentId: !GetAtt SKCRestAPIGatewayCF.RootResourceId
+      PathPart: "getlogs"
+
+  FetchLogsGetMethodCF:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      HttpMethod: "GET"
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      ResourceId: !Ref FetchLogsResourceCF
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SKCFetchLogsLambdaCF.Arn}/invocations"
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: '{"body": $input.json("$")}'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          - StatusCode: '400'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+          - StatusCode: '500'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: '200'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+        - StatusCode: '400'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Origin: false
+        - StatusCode: '500'
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Content-Type: "'application/json'"
+            method.response.header.Access-Control-Allow-Origin: false
+
+  SKCAPIGatewayDeploymentCF:
+    Type: "AWS::ApiGateway::Deployment"
+    Properties:
+      RestApiId: !Ref SKCRestAPIGatewayCF
+    DependsOn:
+      - EncryptResourcePostMethodCF
+      - DecryptResourcePostMethodCF
+      - FetchMessagesGetMethodCF
+      - FetchLogsGetMethodCF
+      - EncryptResourceOptionsMethodCF
+      - DecryptResourceOptionsMethodCF
+
+  SKCAPIGatewayStageCF:
+    Type: "AWS::ApiGateway::Stage"
+    Properties:
+      StageName: "prod"
+      Description: "Production Deployment for SymmetricKeyCryptoSystems REST APIs"
+      RestApiId: !Ref SKCRestAPIGatewayCF
+      DeploymentId: !Ref SKCAPIGatewayDeploymentCF
+
+
+  # Setting Permission for API Gateway to Access Lambdas
+  SKCEncryptLambdaPermissionCF:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt SKCEncryptLambdaCF.Arn
+      Principal: apigateway.amazonaws.com
+    DependsOn:
+      - SKCAPIGatewayDeploymentCF
+  
+  SKCDecryptLambdaPermissionCF:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt SKCDecryptLambdaCF.Arn
+      Principal: apigateway.amazonaws.com
+    DependsOn:
+      - SKCAPIGatewayDeploymentCF
+
+  SKCFetchMsgLambdaPermissionCF:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt SKCFetchMsgLambdaCF.Arn
+      Principal: apigateway.amazonaws.com
+    DependsOn:
+      - SKCAPIGatewayDeploymentCF
+
+  SKCFetchLogsLambdaPermissionCF:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt SKCFetchLogsLambdaCF.Arn
+      Principal: apigateway.amazonaws.com
+    DependsOn:
+      - SKCAPIGatewayDeploymentCF   
+
+Outputs:
+  ApiGatewayUrl:
+    Value: !Sub "https://${SKCRestAPIGatewayCF}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+    Description: "URL of the API Gateway endpoint"
+  
+  SKCEncryptLambdaCFArn:
+    Value: !GetAtt SKCEncryptLambdaCF.Arn
+    Description: "ARN of the SKCEncryptLambdaCF Lambda function"
+
+  SKCDecryptLambdaCFArn:
+    Value: !GetAtt SKCDecryptLambdaCF.Arn
+    Description: "ARN of the SKCDecryptLambdaCF Lambda function"
+
+  SKCFetchMsgLambdaCFArn:
+    Value: !GetAtt SKCFetchMsgLambdaCF.Arn
+    Description: "ARN of the SKCFetchMsgLambdaCF Lambda function"
+
+  SKCFetchLogsLambdaCFArn:
+    Value: !GetAtt SKCFetchLogsLambdaCF.Arn
+    Description: "ARN of the SKCFetchLogsLambdaCF Lambda function"

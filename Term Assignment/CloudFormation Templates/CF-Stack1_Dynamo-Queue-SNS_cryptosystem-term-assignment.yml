@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+
+  #DynamoDB Table to store Logs of Message Exchanges
+  SKCDynamoDBMessageLog:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "SKCMessageLog"    
+      AttributeDefinitions:
+        - AttributeName: "MessageID"
+          AttributeType: "S"
+        - AttributeName: "Timestamp"
+          AttributeType: "S"          
+        - AttributeName: "MessageStatus"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "MessageID"
+          KeyType: "HASH"
+        - AttributeName: "Timestamp"
+          KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        - IndexName: "MessageStatusIndex"
+          KeySchema:
+            - AttributeName: "MessageStatus"
+              KeyType: "HASH"
+            - AttributeName: "Timestamp"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+      BillingMode: "PAY_PER_REQUEST"
+
+  #SQS MQ To Post Encrypted Messages
+  SKCMessageQueueCF:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: "SKCMessageQueueCF"
+      SqsManagedSseEnabled: true
+
+  SKCMessageQueueCFPolicy:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues: 
+        - !Ref SKCMessageQueueCF
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action:
+              - SQS:SendMessage
+              - SQS:ReceiveMessage
+              - SQS:DeleteMessage
+            Resource: !GetAtt SKCMessageQueueCF.Arn
+          - Effect: Allow
+            Principal:
+              AWS: "arn:aws:iam::387793876722:role/LabRole"
+            Action:
+              - SQS:SendMessage
+              - SQS:ReceiveMessage
+              - SQS:DeleteMessage
+            Resource: !GetAtt SKCMessageQueueCF.Arn
+
+  # Create SNS Topic that can be subscibed to for receiving Text notifications upon successful message decryption.
+  SKCCreateSNSTopicCF:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: "DECRYPTED!"
+      TopicName: "SKCMessageTopic"
+
+  SKCCreateSNSTopicPolicyCF:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "AllowPublish"
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: "sns:Publish"
+            Resource: !Ref SKCCreateSNSTopicCF
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref SKCCreateSNSTopicCF
+          - Sid: "AllowSubscribeAndReceive"
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action:
+              - "sns:Subscribe"
+              - "sns:Receive"
+            Resource: !Ref SKCCreateSNSTopicCF
+      Topics:
+        - !Ref SKCCreateSNSTopicCF
+
+Outputs:
+  QueueUrl:
+    Value: !GetAtt SKCMessageQueueCF.QueueUrl
+    Description: "URL of the SQS queue for Posting Encrypted Messages"
+
+  SNSArn:
+    Value: !Ref SKCCreateSNSTopicCF
+    Description: "ARN of the SNS topic for notifying senders of successful decryption"

@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  #Elastic Beanstalk Application to run the Frontend ReactJS Application 
+  SKCFrontendApplication:
+    Type: "AWS::ElasticBeanstalk::Application"
+    Properties:
+      Description: "Elastic Beanstalk Application for the Frontend App"
+      ApplicationName: "SymmetricKeyCryptosystemCF"
+
+  SKCFrontendAppVersion:
+    Type: "AWS::ElasticBeanstalk::ApplicationVersion"
+    Properties:
+      ApplicationName: !Ref SKCFrontendApplication
+      Description: "Application Version of the Frontend App"
+      SourceBundle:
+        S3Bucket: "rishivasa-b00902815"
+        S3Key: "SymmetricKeyCryptoApp_V4.0.zip"
+
+  SKCFrontendAppConfigTemplate:
+    Type: "AWS::ElasticBeanstalk::ConfigurationTemplate"
+    Properties: 
+     ApplicationName: !Ref SKCFrontendApplication
+     Description: "Configuration Template for the Frontend App"
+     SolutionStackName: "64bit Amazon Linux 2 v5.8.0 running Node.js 18"
+     OptionSettings: 
+      - Namespace: "aws:autoscaling:launchconfiguration"
+        OptionName: "InstanceType"
+        Value: "t3.micro,t3.small"
+      - Namespace: "aws:autoscaling:launchconfiguration"
+        OptionName: "EC2KeyName"
+        Value: "vockey"
+      - Namespace: "aws:autoscaling:launchconfiguration"
+        OptionName: "IamInstanceProfile"
+        Value: "LabInstanceProfile"
+      - Namespace: "aws:elasticbeanstalk:environment"
+        OptionName: "ServiceRole"
+        Value: "arn:aws:iam::387793876722:role/LabRole"
+      - Namespace: "aws:elasticbeanstalk:environment"
+        OptionName: "EnvironmentType"
+        Value: "SingleInstance"
+
+  SKCFrontendAppEnvironment:
+    Type: "AWS::ElasticBeanstalk::Environment"
+    Properties:
+      ApplicationName: !Ref SKCFrontendApplication
+      EnvironmentName: "SymmetrickKeyCryptoFrontendAppEnvCF"
+      TemplateName: !Ref SKCFrontendAppConfigTemplate
+      VersionLabel: !Ref SKCFrontendAppVersion
+
+Outputs:
+  ApplicationURL:
+    Description: "URL of the Elastic Beanstalk Frontend application"
+    Value:
+      Fn::Join:
+        - ""
+        - - "http://"
+          - Fn::GetAtt: [SKCFrontendAppEnvironment, EndpointURL]
+        
